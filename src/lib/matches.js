@@ -1,34 +1,35 @@
 // World Cup 2026 — 48 teams, 12 groups, 104 matches
-// Phase: 'groups' | 'r32' | 'r16' | 'qf' | 'sf' | 'final'
+// Grupos oficiales según sorteo FIFA del 5 de diciembre de 2025
+// Phase: 'groups' | 'r32' | 'r16' | 'qf' | 'sf' | '3rd' | 'final'
 
 export const GROUPS = {
-  A: ['Mexico', 'USA', 'Uruguay', 'Panama'],
-  B: ['Argentina', 'Ecuador', 'Poland', 'Morocco'],
-  C: ['France', 'Australia', 'Senegal', 'Honduras'],
-  D: ['Brazil', 'Japan', 'Colombia', 'Qatar'],
-  E: ['England', 'Serbia', 'Cameroon', 'New Zealand'],
-  F: ['Germany', 'Portugal', 'Turkey', 'Malaysia'],
-  G: ['Spain', 'South Korea', 'Peru', 'Kenya'],
-  H: ['Netherlands', 'Chile', 'Ukraine', 'Iraq'],
-  I: ['Italy', 'Ivory Coast', 'Bolivia', 'Saudi Arabia'],
-  J: ['Belgium', 'Nigeria', 'Canada', 'IR Iran'],
-  K: ['Croatia', 'Algeria', 'Guatemala', 'Togo'],
-  L: ['Switzerland', 'Egypt', 'Venezuela', 'Tanzania'],
+  A: ['México', 'Sudáfrica', 'Corea del Sur', 'Chequia'],
+  B: ['Canadá', 'Suiza', 'Qatar', 'Bosnia y Herzegovina'],
+  C: ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
+  D: ['Estados Unidos', 'Paraguay', 'Australia', 'Turquía'],
+  E: ['Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador'],
+  F: ['Países Bajos', 'Japón', 'Túnez', 'Suecia'],
+  G: ['Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda'],
+  H: ['España', 'Cabo Verde', 'Arabia Saudita', 'Uruguay'],
+  I: ['Francia', 'Senegal', 'Noruega', 'Iraq'],
+  J: ['Argentina', 'Argelia', 'Austria', 'Jordania'],
+  K: ['Portugal', 'Colombia', 'Uzbekistán', 'DR Congo'],
+  L: ['Inglaterra', 'Croacia', 'Ghana', 'Panamá'],
 }
 
 export const FLAGS = {
-  'Mexico': '🇲🇽', 'USA': '🇺🇸', 'Uruguay': '🇺🇾', 'Panama': '🇵🇦',
-  'Argentina': '🇦🇷', 'Ecuador': '🇪🇨', 'Poland': '🇵🇱', 'Morocco': '🇲🇦',
-  'France': '🇫🇷', 'Australia': '🇦🇺', 'Senegal': '🇸🇳', 'Honduras': '🇭🇳',
-  'Brazil': '🇧🇷', 'Japan': '🇯🇵', 'Colombia': '🇨🇴', 'Qatar': '🇶🇦',
-  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Serbia': '🇷🇸', 'Cameroon': '🇨🇲', 'New Zealand': '🇳🇿',
-  'Germany': '🇩🇪', 'Portugal': '🇵🇹', 'Turkey': '🇹🇷', 'Malaysia': '🇲🇾',
-  'Spain': '🇪🇸', 'South Korea': '🇰🇷', 'Peru': '🇵🇪', 'Kenya': '🇰🇪',
-  'Netherlands': '🇳🇱', 'Chile': '🇨🇱', 'Ukraine': '🇺🇦', 'Iraq': '🇮🇶',
-  'Italy': '🇮🇹', 'Ivory Coast': '🇨🇮', 'Bolivia': '🇧🇴', 'Saudi Arabia': '🇸🇦',
-  'Belgium': '🇧🇪', 'Nigeria': '🇳🇬', 'Canada': '🇨🇦', 'IR Iran': '🇮🇷',
-  'Croatia': '🇭🇷', 'Algeria': '🇩🇿', 'Guatemala': '🇬🇹', 'Togo': '🇹🇬',
-  'Switzerland': '🇨🇭', 'Egypt': '🇪🇬', 'Venezuela': '🇻🇪', 'Tanzania': '🇹🇿',
+  'México': '🇲🇽', 'Sudáfrica': '🇿🇦', 'Corea del Sur': '🇰🇷', 'Chequia': '🇨🇿',
+  'Canadá': '🇨🇦', 'Suiza': '🇨🇭', 'Qatar': '🇶🇦', 'Bosnia y Herzegovina': '🇧🇦',
+  'Brasil': '🇧🇷', 'Marruecos': '🇲🇦', 'Haití': '🇭🇹', 'Escocia': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Estados Unidos': '🇺🇸', 'Paraguay': '🇵🇾', 'Australia': '🇦🇺', 'Turquía': '🇹🇷',
+  'Alemania': '🇩🇪', 'Curazao': '🇨🇼', 'Costa de Marfil': '🇨🇮', 'Ecuador': '🇪🇨',
+  'Países Bajos': '🇳🇱', 'Japón': '🇯🇵', 'Túnez': '🇹🇳', 'Suecia': '🇸🇪',
+  'Bélgica': '🇧🇪', 'Egipto': '🇪🇬', 'Irán': '🇮🇷', 'Nueva Zelanda': '🇳🇿',
+  'España': '🇪🇸', 'Cabo Verde': '🇨🇻', 'Arabia Saudita': '🇸🇦', 'Uruguay': '🇺🇾',
+  'Francia': '🇫🇷', 'Senegal': '🇸🇳', 'Noruega': '🇳🇴', 'Iraq': '🇮🇶',
+  'Argentina': '🇦🇷', 'Argelia': '🇩🇿', 'Austria': '🇦🇹', 'Jordania': '🇯🇴',
+  'Portugal': '🇵🇹', 'Colombia': '🇨🇴', 'Uzbekistán': '🇺🇿', 'DR Congo': '🇨🇩',
+  'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Croacia': '🇭🇷', 'Ghana': '🇬🇭', 'Panamá': '🇵🇦',
   'TBD': '❓',
 }
 
