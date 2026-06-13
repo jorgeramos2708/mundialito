@@ -33,14 +33,14 @@ const flag = (name) => T[name] || '🏳️'
 // Fuente: FIFA.com — fase de grupos
 const SCHEDULE = [
   // ── JORNADA 1 ──
-  {id:'g01',home:'México',        away:'Sudáfrica',          utc:'2026-06-11T23:00'},
-  {id:'g02',home:'Corea del Sur', away:'Chequia',            utc:'2026-06-12T23:00'},
-  {id:'g03',home:'Canadá',        away:'Suiza',              utc:'2026-06-13T02:00'},
-  {id:'g04',home:'Qatar',         away:'Bosnia y Herzegovina',utc:'2026-06-13T02:00'},
-  {id:'g05',home:'Brasil',        away:'Marruecos',          utc:'2026-06-13T23:00'},
-  {id:'g06',home:'Haití',         away:'Escocia',            utc:'2026-06-14T23:00'},
-  {id:'g07',home:'Estados Unidos',away:'Paraguay',           utc:'2026-06-14T02:00'},
-  {id:'g08',home:'Australia',     away:'Turquía',            utc:'2026-06-15T02:00'},
+  {id:'g01',home:'México',        away:'Sudáfrica',           utc:'2026-06-11T23:00'}, // 11 jun 18:00 CT
+  {id:'g02',home:'Corea del Sur', away:'Chequia',             utc:'2026-06-12T02:00'}, // 11 jun 21:00 CT
+  {id:'g03',home:'Canadá',        away:'Bosnia y Herzegovina',utc:'2026-06-12T23:00'}, // 12 jun 18:00 ET
+  {id:'g04',home:'Qatar',         away:'Suiza',               utc:'2026-06-13T19:00'}, // 13 jun
+  {id:'g05',home:'Brasil',        away:'Marruecos',           utc:'2026-06-14T00:00'}, // 13 jun
+  {id:'g06',home:'Haití',         away:'Escocia',             utc:'2026-06-14T22:00'}, // 14 jun
+  {id:'g07',home:'Estados Unidos',away:'Paraguay',            utc:'2026-06-13T02:00'}, // 12 jun 21:00 PT
+  {id:'g08',home:'Australia',     away:'Turquía',             utc:'2026-06-15T00:00'}, // 14 jun
   {id:'g09',home:'Alemania',      away:'Curazao',            utc:'2026-06-15T23:00'},
   {id:'g10',home:'Costa de Marfil',away:'Ecuador',           utc:'2026-06-16T02:00'},
   {id:'g11',home:'Países Bajos',  away:'Japón',              utc:'2026-06-16T23:00'},
@@ -109,6 +109,15 @@ const SCHEDULE = [
   {id:'g72',home:'Croacia',       away:'Panamá',             utc:'2026-07-06T02:00'},
 ].map(m => ({ ...m, date: new Date(m.utc + ':00Z'), homeScore: null, awayScore: null }))
 
+// ─── Resultados reales — actualizar aquí conforme avanza el torneo ────────────
+const RESULTS = {
+  'g01': { homeScore: 2, awayScore: 0 }, // México 2-0 Sudáfrica — 11 jun
+  'g02': { homeScore: 2, awayScore: 1 }, // Corea del Sur 2-1 Chequia — 11 jun
+  'g03': { homeScore: 1, awayScore: 1 }, // Canadá 1-1 Bosnia y Herzegovina — 12 jun
+  'g07': { homeScore: 4, awayScore: 1 }, // Estados Unidos 4-1 Paraguay — 12 jun
+}
+const SCHEDULE_FINAL = SCHEDULE.map(m => RESULTS[m.id] ? { ...m, ...RESULTS[m.id] } : m)
+
 // ─── Countdown ────────────────────────────────────────────────────────────────
 function Countdown({ target }) {
   const [diff, setDiff] = useState(null)
@@ -171,8 +180,7 @@ function MatchRow({ m, showScore, isLive }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function LiveMatches() {
   const [tab, setTab] = useState('upcoming')
-  const [matches, setMatches] = useState(SCHEDULE)
-  const [loading, setLoading] = useState(false)
+  const [matches, setMatches] = useState(SCHEDULE_FINAL)
   const [lastUpdated, setLastUpdated] = useState(new Date())
 
   // Intentar obtener resultados reales sin bloquear el render
@@ -213,7 +221,7 @@ export default function LiveMatches() {
         })
       })
       // Aplicar resultados al calendario
-      setMatches(prev => prev.map(m => {
+      setMatches(SCHEDULE_FINAL.map(m => {
         const r = results[`${m.home}|${m.away}`]
         return r ? { ...m, ...r } : m
       }))
@@ -227,12 +235,13 @@ export default function LiveMatches() {
     return () => clearInterval(id)
   }, [fetchResults])
 
-  const now = Date.now()
-  const LIVE_WINDOW = 115 * 60 * 1000 // 115 min
+  const [tick, setTick] = useState(Date.now())
+  useEffect(() => { const id = setInterval(() => setTick(Date.now()), 30000); return () => clearInterval(id) }, [])
 
-  const live     = matches.filter(m => m.homeScore === null && m.date.getTime() <= now && now <= m.date.getTime() + LIVE_WINDOW)
+  const LIVE_WINDOW = 115 * 60 * 1000
+  const live     = matches.filter(m => m.homeScore === null && m.date.getTime() <= tick && tick <= m.date.getTime() + LIVE_WINDOW)
   const finished = matches.filter(m => m.homeScore !== null).slice().reverse()
-  const upcoming = matches.filter(m => m.homeScore === null && m.date.getTime() > now && !(m.date.getTime() <= now && now <= m.date.getTime() + LIVE_WINDOW))
+  const upcoming = matches.filter(m => m.homeScore === null && m.date.getTime() > tick)
   const nextMatch = upcoming[0] || null
 
   const tabs = [
