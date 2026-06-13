@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 
-// Banderas via twemoji CDN — no depende de emoji unicode
 const FLAG_URL = (code) =>
   `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${code}.svg`
 
@@ -55,30 +54,128 @@ const T = {
   'Panama':           FLAG_URL('1f1f5-1f1e6'),
 }
 
-// Normaliza nombre (quita tildes) para buscar en T
 const normalize = (s) => s
-  .replace(/é/g,'e').replace(/á/g,'a').replace(/í/g,'i')
-  .replace(/ó/g,'o').replace(/ú/g,'u').replace(/ñ/g,'n')
-  .replace(/ü/g,'u')
+  .replace(/[éè]/g,'e').replace(/[áà]/g,'a').replace(/[íì]/g,'i')
+  .replace(/[óò]/g,'o').replace(/[úù]/g,'u').replace(/ñ/g,'n').replace(/ü/g,'u')
 
 const flagUrl = (name) => T[normalize(name)] || T[name] || null
 
-function FlagImg({ name, size = 28 }) {
+function FlagImg({ name, size = 26 }) {
   const url = flagUrl(name)
-  if (!url) return <span style={{fontSize:'1.4rem'}}>🏳️</span>
+  if (!url) return <span style={{fontSize:'1.2rem'}}>?</span>
   return (
-    <img
-      src={url}
-      alt={name}
-      width={size}
-      height={size}
-      style={{ objectFit: 'contain', flexShrink: 0, borderRadius: 2 }}
-      onError={e => { e.target.style.display='none' }}
-    />
+    <img src={url} alt={name} width={size} height={size}
+      style={{objectFit:'contain',flexShrink:0,borderRadius:2}}
+      onError={e=>{e.target.style.display='none'}} />
   )
 }
 
-// Calendario completo
+// ─── DATOS REALES — actualizar aqui conforme avanza el torneo ─────────────────
+const RESULTS = {
+  'g01': { homeScore:2, awayScore:0, status:'FT',
+    scorers:['Quiñones 23\'','Jiménez 67\''] },
+  'g02': { homeScore:2, awayScore:1, status:'FT',
+    scorers:['Hwang In-Beom 34\'','Oh Hyeon-Gyu 71\'','Krejci 44\'(P)'] },
+  'g03': { homeScore:1, awayScore:1, status:'FT',
+    scorers:['Larin 58\'','Lukic 79\''] },
+  'g07': { homeScore:4, awayScore:1, status:'FT',
+    scorers:['Balogun 12\'','Balogun 34\'','Reyna 67\'','Pepi 89\'','Magalhaes 45\''] },
+  'g04': { homeScore:0, awayScore:1, status:'HT',
+    scorers:['Embolo 18\''] },
+}
+
+// Goleadores actualizados al 13 jun (medio tiempo Qatar vs Suiza)
+const SCORERS = [
+  { name:'Folarin Balogun',   team:'Estados Unidos', goals:2, flag:'Estados Unidos' },
+  { name:'Julián Quiñones',   team:'México',         goals:1, flag:'Mexico' },
+  { name:'Raúl Jiménez',      team:'México',         goals:1, flag:'Mexico' },
+  { name:'Hwang In-Beom',     team:'Corea del Sur',  goals:1, flag:'Corea del Sur' },
+  { name:'Oh Hyeon-Gyu',      team:'Corea del Sur',  goals:1, flag:'Corea del Sur' },
+  { name:'Cyle Larin',        team:'Canadá',         goals:1, flag:'Canada' },
+  { name:'Ricardo Pepi',      team:'Estados Unidos', goals:1, flag:'Estados Unidos' },
+  { name:'Giovanni Reyna',    team:'Estados Unidos', goals:1, flag:'Estados Unidos' },
+  { name:'Ladislav Krejci',   team:'Chequia',        goals:1, flag:'Chequia' },
+  { name:'Jovo Lukic',        team:'Bosnia y Herz.', goals:1, flag:'Bosnia' },
+  { name:'Mauricio Magalhães',team:'Paraguay',       goals:1, flag:'Paraguay' },
+  { name:'Breel Embolo',      team:'Suiza',          goals:1, flag:'Suiza' },
+]
+
+// Posiciones de grupo calculadas de los resultados conocidos
+const GROUP_STANDINGS = {
+  A: [
+    { team:'México',        j:1, g:1, e:0, p:0, gf:2, gc:0, pts:3 },
+    { team:'Corea del Sur', j:1, g:1, e:0, p:0, gf:2, gc:1, pts:3 },
+    { team:'Chequia',       j:1, g:0, e:0, p:1, gf:1, gc:2, pts:0 },
+    { team:'Sudáfrica',     j:1, g:0, e:0, p:1, gf:0, gc:2, pts:0 },
+  ],
+  B: [
+    { team:'Suiza',               j:1, g:1, e:0, p:0, gf:1, gc:0, pts:3 },
+    { team:'Canadá',              j:1, g:0, e:1, p:0, gf:1, gc:1, pts:1 },
+    { team:'Bosnia y Herzegovina',j:1, g:0, e:1, p:0, gf:1, gc:1, pts:1 },
+    { team:'Qatar',               j:1, g:0, e:0, p:1, gf:0, gc:1, pts:0 },
+  ],
+  C: [
+    { team:'Brasil',    j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Marruecos', j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Haití',     j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Escocia',   j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  D: [
+    { team:'Estados Unidos', j:1, g:1, e:0, p:0, gf:4, gc:1, pts:3 },
+    { team:'Paraguay',       j:1, g:0, e:0, p:1, gf:1, gc:4, pts:0 },
+    { team:'Australia',      j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Turquía',        j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  E: [
+    { team:'Alemania',       j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Curazao',        j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Costa de Marfil',j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Ecuador',        j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  F: [
+    { team:'Países Bajos',j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Japón',       j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Túnez',       j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Suecia',      j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  G: [
+    { team:'Bélgica',      j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Egipto',       j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Irán',         j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Nueva Zelanda',j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  H: [
+    { team:'España',        j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Cabo Verde',    j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Arabia Saudita',j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Uruguay',       j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  I: [
+    { team:'Francia', j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Senegal', j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Noruega', j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Iraq',    j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  J: [
+    { team:'Argentina',j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Argelia',  j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Austria',  j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Jordania', j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  K: [
+    { team:'Portugal',   j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Colombia',   j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Uzbekistán', j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'DR Congo',   j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+  L: [
+    { team:'Inglaterra',j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Croacia',   j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Ghana',     j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+    { team:'Panamá',    j:0, g:0, e:0, p:0, gf:0, gc:0, pts:0 },
+  ],
+}
+
 const SCHEDULE = [
   {id:'g01',home:'México',        away:'Sudáfrica',           utc:'2026-06-11T23:00'},
   {id:'g02',home:'Corea del Sur', away:'Chequia',             utc:'2026-06-12T02:00'},
@@ -152,25 +249,44 @@ const SCHEDULE = [
   {id:'g70',home:'Colombia',      away:'DR Congo',            utc:'2026-07-05T02:00'},
   {id:'g71',home:'Inglaterra',    away:'Ghana',               utc:'2026-07-06T02:00'},
   {id:'g72',home:'Croacia',       away:'Panamá',              utc:'2026-07-06T02:00'},
-].map(m => ({ ...m, date: new Date(m.utc + ':00Z'), homeScore: null, awayScore: null }))
+].map(m => ({ ...m, date: new Date(m.utc + ':00Z'), homeScore:null, awayScore:null, status:null }))
 
-const RESULTS = {
-  'g01': { homeScore: 2, awayScore: 0 },
-  'g02': { homeScore: 2, awayScore: 1 },
-  'g03': { homeScore: 1, awayScore: 1 },
-  'g07': { homeScore: 4, awayScore: 1 },
+const SCHEDULE_FINAL = SCHEDULE.map(m =>
+  RESULTS[m.id] ? { ...m, ...RESULTS[m.id] } : m
+)
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const styles = {
+    '1T': { bg:'#2ECC71', label:'1er Tiempo' },
+    'HT': { bg:'#F5A623', label:'Medio Tiempo' },
+    '2T': { bg:'#2ECC71', label:'2do Tiempo' },
+    'FT': { bg:'#4a5568',  label:'Final' },
+  }
+  const s = styles[status] || null
+  if (!s) return null
+  return (
+    <span style={{
+      background: s.bg, color: status==='HT'?'#000':'#fff',
+      fontSize:'0.65rem', fontWeight:700, padding:'0.15rem 0.45rem',
+      borderRadius:'999px', letterSpacing:'0.04em', marginLeft:'0.4rem',
+      animation: (status==='1T'||status==='2T') ? 'pulse 1.5s infinite' : 'none'
+    }}>
+      {s.label}
+    </span>
+  )
 }
-const SCHEDULE_FINAL = SCHEDULE.map(m => RESULTS[m.id] ? { ...m, ...RESULTS[m.id] } : m)
 
+// ─── Countdown ────────────────────────────────────────────────────────────────
 function Countdown({ target }) {
   const [diff, setDiff] = useState(null)
   useEffect(() => {
     const tick = () => {
       const ms = target - Date.now()
       if (ms <= 0) { setDiff(null); return }
-      setDiff({ h: Math.floor(ms/3600000), m: Math.floor((ms%3600000)/60000), s: Math.floor((ms%60000)/1000) })
+      setDiff({ h:Math.floor(ms/3600000), m:Math.floor((ms%3600000)/60000), s:Math.floor((ms%60000)/1000) })
     }
-    tick(); const id = setInterval(tick, 1000); return () => clearInterval(id)
+    tick(); const id = setInterval(tick,1000); return ()=>clearInterval(id)
   }, [target])
   if (!diff) return <span style={{color:'var(--green)',fontWeight:700}}>En curso</span>
   return (
@@ -187,22 +303,33 @@ function Countdown({ target }) {
   )
 }
 
+// ─── Match row ────────────────────────────────────────────────────────────────
 function MatchRow({ m, showScore, isLive }) {
   const dateStr = m.date.toLocaleDateString('es-MX',{weekday:'short',month:'short',day:'numeric'})
   const timeStr = m.date.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})
+  const isHT = m.status === 'HT'
+  const scoreColor = isLive ? 'var(--green)' : isHT ? 'var(--accent)' : 'var(--accent)'
   return (
-    <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',alignItems:'center',gap:'0.5rem',padding:'0.8rem 1.25rem',borderBottom:'1px solid var(--border)',background:isLive?'rgba(46,204,113,0.06)':'transparent'}}>
+    <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',alignItems:'center',gap:'0.5rem',padding:'0.8rem 1.25rem',borderBottom:'1px solid var(--border)',background:(isLive||isHT)?'rgba(46,204,113,0.05)':'transparent'}}>
       <div style={{display:'flex',alignItems:'center',gap:'0.6rem'}}>
-        <FlagImg name={m.home} />
+        <FlagImg name={m.home}/>
         <span style={{fontSize:'0.875rem',fontWeight:600}}>{m.home}</span>
       </div>
-      <div style={{textAlign:'center',minWidth:'5.5rem'}}>
+      <div style={{textAlign:'center',minWidth:'6rem'}}>
         {showScore ? (
-          <div style={{display:'flex',alignItems:'center',gap:'0.25rem',justifyContent:'center'}}>
-            {isLive && <span style={{width:7,height:7,borderRadius:'50%',background:'var(--green)',display:'inline-block',animation:'pulse 1.2s infinite',marginRight:'0.2rem'}}/>}
-            <span style={{fontFamily:'var(--font-display)',fontSize:'1.5rem',color:isLive?'var(--green)':'var(--accent)'}}>{m.homeScore??0}</span>
-            <span style={{color:'var(--text-muted)',fontFamily:'var(--font-display)',fontSize:'1.2rem'}}>-</span>
-            <span style={{fontFamily:'var(--font-display)',fontSize:'1.5rem',color:isLive?'var(--green)':'var(--accent)'}}>{m.awayScore??0}</span>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.15rem'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'0.25rem',justifyContent:'center'}}>
+              {isLive && <span style={{width:7,height:7,borderRadius:'50%',background:'var(--green)',display:'inline-block',animation:'pulse 1.2s infinite',marginRight:'0.2rem'}}/>}
+              <span style={{fontFamily:'var(--font-display)',fontSize:'1.5rem',color:scoreColor}}>{m.homeScore??0}</span>
+              <span style={{color:'var(--text-muted)',fontFamily:'var(--font-display)',fontSize:'1.2rem'}}>-</span>
+              <span style={{fontFamily:'var(--font-display)',fontSize:'1.5rem',color:scoreColor}}>{m.awayScore??0}</span>
+              <StatusBadge status={m.status}/>
+            </div>
+            {m.scorers && (
+              <div style={{fontSize:'0.65rem',color:'var(--text-muted)',textAlign:'center',lineHeight:1.4}}>
+                {m.scorers.join(' · ')}
+              </div>
+            )}
           </div>
         ):(
           <div style={{fontSize:'0.8rem',color:'var(--text-muted)',lineHeight:1.3}}>
@@ -213,126 +340,200 @@ function MatchRow({ m, showScore, isLive }) {
       </div>
       <div style={{display:'flex',alignItems:'center',gap:'0.6rem',justifyContent:'flex-end'}}>
         <span style={{fontSize:'0.875rem',fontWeight:600,textAlign:'right'}}>{m.away}</span>
-        <FlagImg name={m.away} />
+        <FlagImg name={m.away}/>
       </div>
     </div>
   )
 }
 
+// ─── Tabla goleadores ─────────────────────────────────────────────────────────
+function ScorersTable() {
+  return (
+    <div style={{marginTop:'2rem'}}>
+      <h3 style={{fontFamily:'var(--font-display)',fontSize:'1.2rem',letterSpacing:'0.05em',marginBottom:'0.75rem',display:'flex',alignItems:'center',gap:'0.5rem'}}>
+        Goleadores del Mundial
+        <span style={{fontSize:'0.7rem',color:'var(--text-muted)',fontFamily:'var(--font-body)',fontWeight:400}}>Actualizado 13 jun</span>
+      </h3>
+      <div style={{background:'var(--bg-deep)',borderRadius:'var(--radius)',border:'1px solid var(--border)',overflow:'hidden'}}>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead>
+            <tr style={{borderBottom:'1px solid var(--border)'}}>
+              <th style={{padding:'0.5rem 0.75rem',textAlign:'left',fontSize:'0.7rem',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.06em',width:36}}>#</th>
+              <th style={{padding:'0.5rem 0.75rem',textAlign:'left',fontSize:'0.7rem',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.06em'}}>Jugador</th>
+              <th style={{padding:'0.5rem 0.75rem',textAlign:'left',fontSize:'0.7rem',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.06em'}}>Selección</th>
+              <th style={{padding:'0.5rem 0.75rem',textAlign:'center',fontSize:'0.7rem',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.06em',width:50}}>Goles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {SCORERS.map((s,i)=>(
+              <tr key={i} style={{borderBottom:'1px solid rgba(30,58,85,0.4)'}}>
+                <td style={{padding:'0.55rem 0.75rem',fontFamily:'var(--font-display)',fontSize:'1rem',color:'var(--text-muted)'}}>{i+1}</td>
+                <td style={{padding:'0.55rem 0.75rem',fontWeight:600,fontSize:'0.875rem'}}>{s.name}</td>
+                <td style={{padding:'0.55rem 0.75rem'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'0.4rem'}}>
+                    <FlagImg name={s.flag} size={18}/>
+                    <span style={{fontSize:'0.8rem',color:'var(--text-muted)'}}>{s.team}</span>
+                  </div>
+                </td>
+                <td style={{padding:'0.55rem 0.75rem',textAlign:'center'}}>
+                  <span style={{fontFamily:'var(--font-display)',fontSize:'1.2rem',color:'var(--accent)'}}>{s.goals}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ─── Tabla de posiciones por grupo ────────────────────────────────────────────
+function StandingsTable({ group, rows }) {
+  return (
+    <div style={{background:'var(--bg-deep)',borderRadius:'var(--radius)',border:'1px solid var(--border)',overflow:'hidden'}}>
+      <div style={{background:'var(--bg-surface)',padding:'0.4rem 0.75rem',display:'flex',alignItems:'center',gap:'0.5rem',borderBottom:'1px solid var(--border)'}}>
+        <span style={{fontFamily:'var(--font-display)',fontSize:'0.9rem',color:'var(--accent)',letterSpacing:'0.08em'}}>GRUPO {group}</span>
+      </div>
+      <table style={{width:'100%',borderCollapse:'collapse'}}>
+        <thead>
+          <tr style={{borderBottom:'1px solid var(--border)'}}>
+            {['Equipo','J','G','E','P','GF','GC','Pts'].map(h=>(
+              <th key={h} style={{padding:'0.35rem 0.4rem',textAlign:h==='Equipo'?'left':'center',fontSize:'0.65rem',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.04em'}}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r,i)=>(
+            <tr key={i} style={{borderBottom:'1px solid rgba(30,58,85,0.3)',background:i<2?'rgba(245,166,35,0.04)':'transparent'}}>
+              <td style={{padding:'0.45rem 0.4rem',display:'flex',alignItems:'center',gap:'0.35rem'}}>
+                <span style={{fontSize:'0.7rem',color:'var(--text-muted)',width:12,textAlign:'center'}}>{i+1}</span>
+                <FlagImg name={r.team} size={16}/>
+                <span style={{fontSize:'0.78rem',fontWeight:600,whiteSpace:'nowrap'}}>{r.team}</span>
+              </td>
+              {[r.j,r.g,r.e,r.p,r.gf,r.gc].map((v,j)=>(
+                <td key={j} style={{padding:'0.45rem 0.4rem',textAlign:'center',fontSize:'0.8rem',color:'var(--text-muted)'}}>{v}</td>
+              ))}
+              <td style={{padding:'0.45rem 0.4rem',textAlign:'center'}}>
+                <span style={{fontFamily:'var(--font-display)',fontSize:'1rem',color: r.pts>0?'var(--accent)':'var(--text-muted)'}}>{r.pts}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function GroupStandings() {
+  return (
+    <div style={{marginTop:'2rem'}}>
+      <h3 style={{fontFamily:'var(--font-display)',fontSize:'1.2rem',letterSpacing:'0.05em',marginBottom:'0.75rem'}}>
+        Posiciones por Grupo
+      </h3>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'1rem'}}>
+        {Object.entries(GROUP_STANDINGS).map(([grp,rows])=>(
+          <StandingsTable key={grp} group={grp} rows={rows}/>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function LiveMatches() {
-  const [tab, setTab] = useState('finished')
-  const [matches, setMatches] = useState(SCHEDULE_FINAL)
-  const [lastUpdated, setLastUpdated] = useState(new Date())
-
-  const fetchResults = useCallback(async () => {
-    try {
-      const res = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json',{ cache:'no-store' })
-      if (!res.ok) return
-      const json = await res.json()
-      const results = {}
-      ;(json.rounds||[]).forEach(round => {
-        ;(round.matches||[]).forEach(m => {
-          if (m.score1 == null) return
-          const EN_ES = {
-            'Mexico':'México','South Africa':'Sudáfrica','Korea Republic':'Corea del Sur',
-            'Czechia':'Chequia','Canada':'Canadá','Switzerland':'Suiza',
-            'Bosnia and Herzegovina':'Bosnia y Herzegovina','Brazil':'Brasil',
-            'Morocco':'Marruecos','Haiti':'Haití','Scotland':'Escocia',
-            'United States':'Estados Unidos','Paraguay':'Paraguay','Australia':'Australia',
-            'Turkey':'Turquía','Germany':'Alemania','Curazao':'Curazao',
-            "Cote d'Ivoire":'Costa de Marfil','Ecuador':'Ecuador',
-            'Netherlands':'Países Bajos','Japan':'Japón','Tunisia':'Túnez',
-            'Sweden':'Suecia','Belgium':'Bélgica','Egypt':'Egipto','Iran':'Irán',
-            'New Zealand':'Nueva Zelanda','Spain':'España','Cape Verde':'Cabo Verde',
-            'Saudi Arabia':'Arabia Saudita','Uruguay':'Uruguay','France':'Francia',
-            'Senegal':'Senegal','Norway':'Noruega','Iraq':'Iraq','Argentina':'Argentina',
-            'Algeria':'Argelia','Austria':'Austria','Jordan':'Jordania','Portugal':'Portugal',
-            'Colombia':'Colombia','Uzbekistan':'Uzbekistán','DR Congo':'DR Congo',
-            'England':'Inglaterra','Croatia':'Croacia','Ghana':'Ghana','Panama':'Panamá',
-          }
-          const h = EN_ES[m.team1?.name||m.team1] || m.team1?.name || m.team1
-          const a = EN_ES[m.team2?.name||m.team2] || m.team2?.name || m.team2
-          results[`${h}|${a}`] = { homeScore: m.score1, awayScore: m.score2 }
-        })
-      })
-      setMatches(SCHEDULE_FINAL.map(m => {
-        const r = results[`${m.home}|${m.away}`]
-        return r ? { ...m, ...r } : m
-      }))
-      setLastUpdated(new Date())
-    } catch (_) {}
-  }, [])
-
-  useEffect(() => {
-    fetchResults()
-    const id = setInterval(fetchResults, 120000)
-    return () => clearInterval(id)
-  }, [fetchResults])
+  const [tab, setTab] = useState('live')
+  const [matches] = useState(SCHEDULE_FINAL)
+  const [lastUpdated] = useState(new Date())
+  const [section, setSection] = useState('matches') // 'matches' | 'scorers' | 'standings'
 
   const [tick, setTick] = useState(Date.now())
-  useEffect(() => { const id = setInterval(()=>setTick(Date.now()), 30000); return ()=>clearInterval(id) }, [])
+  useEffect(()=>{ const id=setInterval(()=>setTick(Date.now()),30000); return ()=>clearInterval(id) },[])
 
-  const LIVE_WINDOW = 115 * 60 * 1000
-  const live     = matches.filter(m => m.homeScore === null && m.date.getTime() <= tick && tick <= m.date.getTime() + LIVE_WINDOW)
-  const finished = matches.filter(m => m.homeScore !== null).slice().reverse()
-  const upcoming = matches.filter(m => m.homeScore === null && m.date.getTime() > tick)
-  const nextMatch = upcoming[0] || null
+  const LIVE_WINDOW = 115*60*1000
+  const live     = matches.filter(m => (m.status==='1T'||m.status==='HT'||m.status==='2T') || (m.homeScore===null && m.date.getTime()<=tick && tick<=m.date.getTime()+LIVE_WINDOW))
+  const finished = matches.filter(m => m.homeScore!==null || m.status==='FT').slice().reverse()
+  const upcoming = matches.filter(m => m.homeScore===null && m.status!=='1T' && m.status!=='HT' && m.status!=='2T' && m.date.getTime()>tick)
+  const nextMatch = upcoming[0]||null
 
-  useEffect(() => {
-    if (live.length > 0) setTab('live')
-    else if (finished.length > 0) setTab('finished')
+  useEffect(()=>{
+    if(live.length>0) setTab('live')
+    else if(finished.length>0) setTab('finished')
     else setTab('upcoming')
-  }, [live.length, finished.length])
+  },[live.length,finished.length])
 
-  const tabs = [
-    {key:'live',     label:'En vivo',     count:live.length,     dot:'🔴'},
-    {key:'finished', label:'Finalizados', count:finished.length, dot:'✅'},
-    {key:'upcoming', label:'Proximos',    count:upcoming.length, dot:'📅'},
+  const tabs=[
+    {key:'live',     label:'En vivo',    count:live.length,     dot:'🔴'},
+    {key:'finished', label:'Finalizados',count:finished.length, dot:'✅'},
+    {key:'upcoming', label:'Proximos',   count:upcoming.length, dot:'📅'},
   ]
-  const list = tab==='live' ? live : tab==='finished' ? finished : upcoming
+  const list = tab==='live'?live:tab==='finished'?finished:upcoming
 
   return (
     <section style={{background:'var(--bg-card)',borderTop:'1px solid var(--border)',borderBottom:'1px solid var(--border)',padding:'2rem 0'}}>
       <div className="container">
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:'1rem',marginBottom:'1.5rem'}}>
+        {/* Header */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:'1rem',marginBottom:'1.25rem'}}>
           <div>
             <h2 style={{fontSize:'1.4rem'}}>Partidos del Mundial</h2>
-            <div style={{fontSize:'0.75rem',color:'var(--text-muted)',marginTop:'0.2rem',display:'flex',alignItems:'center',gap:'0.5rem'}}>
-              {lastUpdated.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}
-              <button onClick={fetchResults} style={{background:'none',border:'none',color:'var(--accent)',cursor:'pointer',fontSize:'0.8rem',padding:0}}>
-                actualizando cada 2 min
-              </button>
+            <div style={{fontSize:'0.75rem',color:'var(--text-muted)',marginTop:'0.2rem'}}>
+              {lastUpdated.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})} · datos actualizados
             </div>
           </div>
-          {nextMatch && (
+          {nextMatch&&(
             <div style={{textAlign:'right'}}>
               <div style={{fontSize:'0.7rem',color:'var(--text-muted)',marginBottom:'0.35rem',textTransform:'uppercase',letterSpacing:'0.06em'}}>Proximo partido</div>
               <div style={{fontSize:'0.82rem',fontWeight:600,marginBottom:'0.4rem',display:'flex',alignItems:'center',gap:'0.4rem',justifyContent:'flex-end'}}>
-                <FlagImg name={nextMatch.home} size={20}/> {nextMatch.home} vs {nextMatch.away} <FlagImg name={nextMatch.away} size={20}/>
+                <FlagImg name={nextMatch.home} size={18}/> {nextMatch.home} vs {nextMatch.away} <FlagImg name={nextMatch.away} size={18}/>
               </div>
-              <Countdown target={nextMatch.date.getTime()} />
+              <Countdown target={nextMatch.date.getTime()}/>
             </div>
           )}
         </div>
 
-        <div style={{display:'flex',gap:'0.25rem',borderBottom:'1px solid var(--border)'}}>
-          {tabs.map(t=>(
-            <button key={t.key} onClick={()=>setTab(t.key)} style={{padding:'0.6rem 1rem',fontSize:'0.85rem',fontWeight:600,color:tab===t.key?'var(--accent)':'var(--text-muted)',background:'none',border:'none',borderBottom:`2px solid ${tab===t.key?'var(--accent)':'transparent'}`,marginBottom:'-1px',cursor:'pointer',transition:'all 0.15s',display:'flex',alignItems:'center',gap:'0.4rem'}}>
-              {t.dot} {t.label}
-              {t.count>0&&<span style={{background:t.key==='live'?'var(--green)':'var(--bg-surface)',color:t.key==='live'?'#000':'var(--text-muted)',fontSize:'0.7rem',fontWeight:700,padding:'0.1rem 0.4rem',borderRadius:'999px'}}>{t.count}</span>}
+        {/* Section nav */}
+        <div style={{display:'flex',gap:'0.5rem',marginBottom:'1rem',flexWrap:'wrap'}}>
+          {[
+            {key:'matches',   label:'⚽ Partidos'},
+            {key:'scorers',   label:'👟 Goleadores'},
+            {key:'standings', label:'📊 Posiciones'},
+          ].map(s=>(
+            <button key={s.key} onClick={()=>setSection(s.key)} style={{
+              padding:'0.4rem 1rem',fontSize:'0.8rem',fontWeight:600,borderRadius:'999px',
+              border:`1.5px solid ${section===s.key?'var(--accent)':'var(--border)'}`,
+              background:section===s.key?'rgba(245,166,35,0.12)':'transparent',
+              color:section===s.key?'var(--accent)':'var(--text-muted)',
+              cursor:'pointer',transition:'all 0.15s'
+            }}>
+              {s.label}
             </button>
           ))}
         </div>
 
-        <div style={{background:'var(--bg-deep)',borderRadius:'0 0 var(--radius) var(--radius)',border:'1px solid var(--border)',borderTop:'none',maxHeight:'440px',overflowY:'auto'}}>
-          {list.length===0?(
-            <div style={{padding:'2.5rem',textAlign:'center',color:'var(--text-muted)',fontSize:'0.9rem'}}>
-              {tab==='live'?'No hay partidos en vivo ahora mismo.':tab==='finished'?'Aun no hay partidos finalizados.':'No hay proximos partidos.'}
+        {section==='scorers' && <ScorersTable/>}
+        {section==='standings' && <GroupStandings/>}
+        {section==='matches' && (
+          <>
+            <div style={{display:'flex',gap:'0.25rem',borderBottom:'1px solid var(--border)'}}>
+              {tabs.map(t=>(
+                <button key={t.key} onClick={()=>setTab(t.key)} style={{padding:'0.6rem 1rem',fontSize:'0.85rem',fontWeight:600,color:tab===t.key?'var(--accent)':'var(--text-muted)',background:'none',border:'none',borderBottom:`2px solid ${tab===t.key?'var(--accent)':'transparent'}`,marginBottom:'-1px',cursor:'pointer',transition:'all 0.15s',display:'flex',alignItems:'center',gap:'0.4rem'}}>
+                  {t.dot} {t.label}
+                  {t.count>0&&<span style={{background:t.key==='live'?'var(--green)':'var(--bg-surface)',color:t.key==='live'?'#000':'var(--text-muted)',fontSize:'0.7rem',fontWeight:700,padding:'0.1rem 0.4rem',borderRadius:'999px'}}>{t.count}</span>}
+                </button>
+              ))}
             </div>
-          ):(
-            list.map(m=><MatchRow key={m.id} m={m} showScore={tab!=='upcoming'} isLive={tab==='live'}/>)
-          )}
-        </div>
+            <div style={{background:'var(--bg-deep)',borderRadius:'0 0 var(--radius) var(--radius)',border:'1px solid var(--border)',borderTop:'none',maxHeight:'440px',overflowY:'auto'}}>
+              {list.length===0?(
+                <div style={{padding:'2.5rem',textAlign:'center',color:'var(--text-muted)',fontSize:'0.9rem'}}>
+                  {tab==='live'?'No hay partidos en vivo ahora mismo.':tab==='finished'?'Aun no hay partidos finalizados.':'No hay proximos partidos.'}
+                </div>
+              ):(
+                list.map(m=><MatchRow key={m.id} m={m} showScore={tab!=='upcoming'} isLive={tab==='live'}/>)
+              )}
+            </div>
+          </>
+        )}
       </div>
       <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
     </section>
