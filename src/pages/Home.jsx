@@ -68,34 +68,109 @@ export default function Home() {
       </div>
 
       {/* ── Hero ── */}
-      <section className="hero" style={{ background: 'transparent', borderBottom: '1px solid var(--border)' }}>
+      <style>{`
+        @keyframes slideText {
+          0%   { transform: translateX(-18px); opacity: 0; }
+          12%  { transform: translateX(0);     opacity: 1; }
+          88%  { transform: translateX(0);     opacity: 1; }
+          100% { transform: translateX(18px);  opacity: 0; }
+        }
+        @keyframes kickLeg {
+          0%,100% { transform: rotate(0deg); }
+          40%     { transform: rotate(-28deg); }
+          60%     { transform: rotate(12deg); }
+        }
+        @keyframes ballFly {
+          0%   { transform: translate(0,0) scale(1); opacity:1; }
+          50%  { transform: translate(48px,-30px) scale(.85); opacity:.9; }
+          100% { transform: translate(0,0) scale(1); opacity:1; }
+        }
+        @keyframes bodyBob {
+          0%,100% { transform: translateY(0); }
+          50%     { transform: translateY(-3px); }
+        }
+        .hero-slide-text {
+          display: inline-block;
+          animation: slideText 4s ease-in-out infinite;
+        }
+        .hero-slide-text-2 {
+          display: inline-block;
+          animation: slideText 4s ease-in-out infinite;
+          animation-delay: 0.15s;
+        }
+      `}</style>
+
+      <section className="hero" style={{ background: 'transparent', borderBottom: '1px solid var(--border)', paddingTop: '3rem', paddingBottom: '3rem' }}>
         <div className="hero-badge">⚽ Mundial 2026 · 48 Selecciones · USA · México · Canadá</div>
-        <h1 className="hero-title">
-          La quiniela<br />del <em>Mundial</em>
-        </h1>
-        <p className="hero-sub">
+
+        {/* Logo row: footballer SVG + title */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+
+          {/* Footballer SVG */}
+          <svg width="90" height="110" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            {/* Body group — bobs up/down */}
+            <g style={{ animation: 'bodyBob 2s ease-in-out infinite', transformOrigin: '45px 55px' }}>
+              {/* Head */}
+              <circle cx="45" cy="14" r="11" fill="#F5C89A"/>
+              {/* Hair */}
+              <path d="M34 10 Q45 2 56 10 Q52 5 45 4 Q38 5 34 10Z" fill="#3D2B1A"/>
+              {/* Body / jersey — amber */}
+              <rect x="32" y="26" width="26" height="32" rx="5" fill="#F5A623"/>
+              {/* Number on jersey */}
+              <text x="45" y="46" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="bold" fontFamily="sans-serif">10</text>
+              {/* Left arm */}
+              <rect x="20" y="27" width="12" height="7" rx="3.5" fill="#F5A623" transform="rotate(-20 26 30)"/>
+              {/* Right arm — raised */}
+              <rect x="58" y="22" width="12" height="7" rx="3.5" fill="#F5A623" transform="rotate(30 64 25)"/>
+              {/* Shorts */}
+              <rect x="33" y="56" width="24" height="14" rx="3" fill="#1A3A6B"/>
+              {/* Left leg */}
+              <rect x="33" y="70" width="10" height="22" rx="4" fill="#F5C89A"/>
+              {/* Left shoe */}
+              <ellipse cx="38" cy="93" rx="8" ry="4" fill="#222"/>
+              {/* Right leg — kick! */}
+              <g style={{ animation: 'kickLeg 2s ease-in-out infinite', transformOrigin: '52px 70px' }}>
+                <rect x="47" y="70" width="10" height="22" rx="4" fill="#F5C89A"/>
+                <ellipse cx="52" cy="93" rx="8" ry="4" fill="#222"/>
+              </g>
+            </g>
+            {/* Ball — flies when kicked */}
+            <g style={{ animation: 'ballFly 2s ease-in-out infinite', transformOrigin: '68px 88px' }}>
+              <circle cx="68" cy="88" r="9" fill="white" stroke="#333" strokeWidth="1.2"/>
+              <path d="M68 79 L72 84 L68 90 L64 84Z" fill="#333"/>
+              <path d="M59 88 L64 84 L64 92Z" fill="#333" opacity=".5"/>
+              <path d="M77 88 L72 84 L72 92Z" fill="#333" opacity=".5"/>
+            </g>
+          </svg>
+
+          {/* Title */}
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem, 3vw, 1.3rem)', color: 'var(--text-muted)', letterSpacing: '0.2em', marginBottom: '-0.2rem' }}>
+              <span className="hero-slide-text">LA QUINIELA DEL</span>
+            </div>
+            <h1 className="hero-title" style={{ margin: 0, fontSize: 'clamp(3.5rem, 10vw, 7rem)', lineHeight: 1 }}>
+              <span className="hero-slide-text-2">MUNDIAL<em style={{ color: 'var(--accent)' }}>ITO</em></span>
+            </h1>
+          </div>
+        </div>
+
+        <p className="hero-sub" style={{ fontSize: '1.1rem', marginBottom: '1.75rem' }}>
           Predice los 104 partidos, compite con amigos y sube en el ranking global.
           Gratis, sin descargas.
         </p>
 
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {user ? (
-            <Link to="/predictions" className="btn btn-primary">
-              Mis predicciones →
-            </Link>
+            <Link to="/predictions" className="btn btn-primary">Mis predicciones →</Link>
           ) : (
             <>
-              <Link to="/signup" className="btn btn-primary">
-                Jugar gratis →
-              </Link>
-              <Link to="/ranking" className="btn btn-outline">
-                Ver ranking
-              </Link>
+              <Link to="/signup" className="btn btn-primary">Jugar gratis →</Link>
+              <Link to="/ranking" className="btn btn-outline">Ver ranking</Link>
             </>
           )}
         </div>
 
-        <div className="hero-stats">
+        <div className="hero-stats" style={{ marginTop: '2.5rem' }}>
           {[
             { val: '104', lbl: 'Partidos' },
             { val: '48',  lbl: 'Selecciones' },
